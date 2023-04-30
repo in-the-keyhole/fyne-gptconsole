@@ -98,63 +98,38 @@ This styled row should also wrap as expected, but only *when required*.
 		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
 	)
 
-	form := &widget.Form{
-		Items: []*widget.FormItem{
-			{Widget: edit},
-		},
-		OnSubmit: func() {
+	doItAction := func() {
 
-			result := service.Prompt(edit.Text)
+		result := service.Prompt(edit.Text)
 
-			//dataList = append(dataList, edit.Text)
+		//dataList = append(dataList, edit.Text)
 
-			dataList = append(append(dataList, edit.Text), dataList...)[len(dataList):]
+		dataList = append(append(dataList, edit.Text), dataList...)[len(dataList):]
 
-			service.Add(result)
+		service.Add(result)
 
-			// handle form submission
-			//	box.Add(widget.NewSeparator())
+		// handle form submission
+		//	box.Add(widget.NewSeparator())
 
-			//ml.SetMinRowsVisible(50)
+		//ml.SetMinRowsVisible(50)
 
-			ml.SetText(result)
+		ml.SetText(result)
 
-			//box.Add(container.NewPadded(ml))
-			box.Refresh()
+		//box.Add(container.NewPadded(ml))
+		box.Refresh()
 
-			list.Refresh()
-		},
+		list.Refresh()
 	}
 
-	//clearButton = widget.NewButton("Clear", func() { edit.SetText("") } )
+	doItButton := widget.NewButton("Go", doItAction)
 
 	box = container.NewMax(ml)
-	//box.Resize(fyne.NewSize(400, 400))
 
-	//boxScroll := container.NewVScroll(ml)
-
-	//box.Add(ml)
-
-	formBox := container.NewVBox(form)
+	formBox := container.NewBorder(nil, nil, nil, doItButton, edit)
 
 	var mainBox = container.NewVBox(toolBar, formBox, box)
 
 	right := container.NewVBox(mainBox)
-	//right.Resize(fyne.NewSize(1200, 800))
-
-	//left := container.NewBorder(container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, label)
-
-	//	split := container.NewHSplit(left, right)
-	//split.Offset = 0.2
-	//w.SetContent(split)
-
-	//t := widget.NewToolbar(widget.NewToolbarAction(theme.ListIcon(), func() { fmt.Println("New") }),
-	//	widget.NewToolbarSeparator(),
-	//	widget.NewToolbarSpacer(),
-	//	widget.NewToolbarAction(theme.ContentCutIcon(), func() { fmt.Println("Cut") }),
-	//	widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
-	//	widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
-	//)
 
 	main := container.NewHSplit(makeList(edit), right)
 	main.SetOffset(.20)
