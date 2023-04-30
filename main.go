@@ -79,6 +79,16 @@ This styled row should also wrap as expected, but only *when required*.
 
 	edit := widget.NewMultiLineEntry()
 
+	ml := widget.NewMultiLineEntry()
+	ml.SetMinRowsVisible(20)
+
+	//mlScroll := conainer.Sc
+
+	clearButton := widget.NewButton("Clear", func() {
+		edit.SetText("")
+		ml.SetText("")
+	})
+
 	form := &widget.Form{
 		Items: []*widget.FormItem{
 			{Widget: edit},
@@ -94,14 +104,13 @@ This styled row should also wrap as expected, but only *when required*.
 			service.Add(result)
 
 			// handle form submission
-			box.Add(widget.NewSeparator())
+			//	box.Add(widget.NewSeparator())
 
-			ml := widget.NewMultiLineEntry()
-			ml.SetMinRowsVisible(5)
+			//ml.SetMinRowsVisible(50)
 
 			ml.SetText(result)
 
-			box.Add(container.NewPadded(ml))
+			//box.Add(container.NewPadded(ml))
 			box.Refresh()
 
 			list.Refresh()
@@ -110,12 +119,19 @@ This styled row should also wrap as expected, but only *when required*.
 
 	//clearButton = widget.NewButton("Clear", func() { edit.SetText("") } )
 
-	box = container.NewVBox()
+	box = container.NewVBox(ml)
+	//box.Resize(fyne.NewSize(400, 400))
 
-	var mainBox = container.NewVBox(container.NewPadded(form), container.NewPadded(box))
+	//boxScroll := container.NewVScroll(ml)
+
+	//box.Add(ml)
+
+	formBox := container.NewBorder(nil, nil, nil, clearButton, form)
+
+	var mainBox = container.NewVBox(container.NewPadded(formBox), box)
 
 	right := container.NewVBox(mainBox)
-	right.Resize(fyne.NewSize(1200, 800))
+	//right.Resize(fyne.NewSize(1200, 800))
 
 	//left := container.NewBorder(container.NewVBox(title, widget.NewSeparator(), intro), nil, nil, nil, label)
 
@@ -135,7 +151,7 @@ This styled row should also wrap as expected, but only *when required*.
 	main.SetOffset(.20)
 
 	w.SetContent(main)
-	w.Resize(fyne.NewSize(1200, 600))
+	w.Resize(fyne.NewSize(800, 500))
 	w.ShowAndRun()
 }
 
