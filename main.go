@@ -84,10 +84,19 @@ This styled row should also wrap as expected, but only *when required*.
 
 	//mlScroll := conainer.Sc
 
-	clearButton := widget.NewButton("Clear", func() {
+	clearAction := func() {
 		edit.SetText("")
 		ml.SetText("")
-	})
+
+	}
+
+	toolBar := widget.NewToolbar(widget.NewToolbarAction(nil, func() { fmt.Println("New") }),
+		//widget.NewToolbarSeparator(),
+		widget.NewToolbarSpacer(),
+		widget.NewToolbarAction(theme.ContentClearIcon(), clearAction),
+		widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
+		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
+	)
 
 	form := &widget.Form{
 		Items: []*widget.FormItem{
@@ -119,16 +128,16 @@ This styled row should also wrap as expected, but only *when required*.
 
 	//clearButton = widget.NewButton("Clear", func() { edit.SetText("") } )
 
-	box = container.NewVBox(ml)
+	box = container.NewMax(ml)
 	//box.Resize(fyne.NewSize(400, 400))
 
 	//boxScroll := container.NewVScroll(ml)
 
 	//box.Add(ml)
 
-	formBox := container.NewBorder(nil, nil, nil, clearButton, form)
+	formBox := container.NewVBox(form)
 
-	var mainBox = container.NewVBox(container.NewPadded(formBox), box)
+	var mainBox = container.NewVBox(toolBar, formBox, box)
 
 	right := container.NewVBox(mainBox)
 	//right.Resize(fyne.NewSize(1200, 800))
