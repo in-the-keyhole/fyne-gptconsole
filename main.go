@@ -64,14 +64,7 @@ This styled row should also wrap as expected, but only *when required*.
 
 > An interesting quote here, most likely sharing some very interesting wisdom.`)
 
-	//link, err := url.Parse("https://fyne.io/")
-	//if err != nil {
-	//fyne.LogError("Could not parse URL", err)
-	//}
-
 	rich.Scroll = container.ScrollBoth
-
-	//resultBox := container.NewVBox(widget.NewSeparator())
 
 	var box *fyne.Container
 
@@ -79,14 +72,15 @@ This styled row should also wrap as expected, but only *when required*.
 
 	edit := widget.NewMultiLineEntry()
 
-	ml := widget.NewMultiLineEntry()
-	ml.SetMinRowsVisible(20)
+	ml := container.NewMax()
+
+	//ml := widget.NewRichText()
 
 	//mlScroll := conainer.Sc
 
 	clearAction := func() {
 		edit.SetText("")
-		ml.SetText("")
+		//ml.String("")
 
 	}
 
@@ -102,20 +96,18 @@ This styled row should also wrap as expected, but only *when required*.
 
 		result := service.Prompt(edit.Text)
 
-		//dataList = append(dataList, edit.Text)
-
 		dataList = append(append(dataList, edit.Text), dataList...)[len(dataList):]
 
 		service.Add(result)
 
-		// handle form submission
-		//	box.Add(widget.NewSeparator())
+		rtt := widget.NewRichTextWithText(result)
+		rtt.Wrapping = fyne.TextWrapWord
 
-		//ml.SetMinRowsVisible(50)
+		rtt.Scroll = container.ScrollBoth
 
-		ml.SetText(result)
+		ml.RemoveAll()
+		ml.Add(rtt)
 
-		//box.Add(container.NewPadded(ml))
 		box.Refresh()
 
 		list.Refresh()
@@ -123,15 +115,18 @@ This styled row should also wrap as expected, but only *when required*.
 
 	doItButton := widget.NewButton("Go", doItAction)
 
-	box = container.NewMax(ml)
+	box = container.NewBorder(nil, nil, nil, nil, ml)
+	box.Resize(fyne.NewSize(500, 500))
 
 	formBox := container.NewBorder(nil, nil, nil, doItButton, edit)
 
-	var mainBox = container.NewVBox(toolBar, formBox, box)
+	toolFormBox := container.NewBorder(toolBar, nil, nil, nil, formBox)
 
-	right := container.NewVBox(mainBox)
+	var mainBox = container.NewBorder(toolFormBox, nil, nil, nil, box)
 
-	main := container.NewHSplit(makeList(edit), right)
+	//right := container.NewVBox(mainBox)
+
+	main := container.NewHSplit(makeList(edit), mainBox)
 	main.SetOffset(.20)
 
 	w.SetContent(main)
@@ -166,8 +161,7 @@ func makeList(edit *widget.Entry) fyne.CanvasObject {
 	)
 	list.OnSelected = func(id widget.ListItemID) {
 		edit.SetText("Hello")
-		//label.SetText(data[id])
-		//icon.SetResource(theme.DocumentIcon())
+
 	}
 	list.OnUnselected = func(id widget.ListItemID) {
 		label.SetText("Select An Item From The List")
