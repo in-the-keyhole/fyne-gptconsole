@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"time"
 
 	"gptconsole/service"
 
@@ -23,6 +24,9 @@ const preferenceCurrentTutorial = "currentTutorial"
 var topWindow fyne.Window
 var list *widget.List
 var dataList []string
+
+var infProgress = widget.NewProgressBarInfinite()
+var endProgress = make(chan interface{}, 1)
 
 func main() {
 
@@ -59,6 +63,12 @@ func main() {
 * Item2
 * Item3
 
+
+---
+` + "`func () {return hello	}`" + `
+
+---
+
 Normal **Bold** *Italic* [Link](https://fyne.io/) and some ` + "`Code`" + `.
 This styled row should also wrap as expected, but only *when required*.
 
@@ -68,15 +78,13 @@ This styled row should also wrap as expected, but only *when required*.
 
 	var box *fyne.Container
 
-	//var sbox *widget.Scroll
-
 	edit := widget.NewMultiLineEntry()
 
 	ml := container.NewMax()
-
-	//ml := widget.NewRichText()
-
-	//mlScroll := conainer.Sc
+	ml.Add(infProgress)
+	startProgress()
+	ml.RemoveAll()
+	stopProgress()
 
 	clearAction := func() {
 		edit.SetText("")
@@ -94,6 +102,10 @@ This styled row should also wrap as expected, but only *when required*.
 
 	doItAction := func() {
 
+		ml.RemoveAll()
+		ml.Add(infProgress)
+		startProgress()
+
 		result := service.Prompt(edit.Text)
 
 		dataList = append(append(dataList, edit.Text), dataList...)[len(dataList):]
@@ -109,6 +121,8 @@ This styled row should also wrap as expected, but only *when required*.
 		ml.Add(rtt)
 
 		box.Refresh()
+
+		stopProgress()
 
 		list.Refresh()
 	}
@@ -369,4 +383,40 @@ func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
 	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
 		focused.TypedShortcut(s)
 	}
+}
+
+func startProgress() {
+
+	select { // ignore stale end message
+	case <-endProgress:
+	default:
+	}
+
+	go func() {
+		end := endProgress
+		num := 0.0
+		for num < 1.0 {
+			time.Sleep(16 * time.Millisecond)
+			select {
+			case <-end:
+				return
+			default:
+			}
+
+			num += 0.002
+		}
+
+		// TODO make sure this resets when we hide etc...
+		stopProgress()
+	}()
+	infProgress.Start()
+}
+
+func stopProgress() {
+	if !infProgress.Running() {
+		return
+	}
+
+	infProgress.Stop()
+	endProgress <- struct{}{}
 }
