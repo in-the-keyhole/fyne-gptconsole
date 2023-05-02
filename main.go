@@ -23,14 +23,14 @@ const preferenceCurrentTutorial = "currentTutorial"
 
 var topWindow fyne.Window
 var list *widget.List
-var dataList []string
+var dataList []service.Chat
 
 var infProgress = widget.NewProgressBarInfinite()
 var endProgress = make(chan interface{}, 1)
 
 func main() {
 
-	dataList = service.List()
+	dataList = service.Read()
 
 	a := app.NewWithID("io.fyne.demo")
 	a.Settings().SetTheme(theme.DarkTheme())
@@ -64,10 +64,12 @@ func main() {
 * Item3
 
 
----
-` + "`func () {return hello	}`" + `
+"
 
----
+func() {} 
+
+"
+
 
 Normal **Bold** *Italic* [Link](https://fyne.io/) and some ` + "`Code`" + `.
 This styled row should also wrap as expected, but only *when required*.
@@ -79,12 +81,15 @@ This styled row should also wrap as expected, but only *when required*.
 	var box *fyne.Container
 
 	edit := widget.NewMultiLineEntry()
+	rtt := widget.NewMultiLineEntry()
+	rtt.Wrapping = fyne.TextWrapWord
 
 	ml := container.NewMax()
 	ml.Add(infProgress)
 	startProgress()
 	ml.RemoveAll()
 	stopProgress()
+	ml.Add(rtt)
 
 	clearAction := func() {
 		edit.SetText("")
@@ -108,14 +113,20 @@ This styled row should also wrap as expected, but only *when required*.
 
 		result := service.Prompt(edit.Text)
 
-		dataList = append(append(dataList, edit.Text), dataList...)[len(dataList):]
+		c := service.Chat{Prompt: edit.Text, Response: result}
+
+		dataList = append(append(dataList, c), dataList...)[len(dataList):]
+
+		service.Write(dataList)
 
 		service.Add(result)
 
-		rtt := widget.NewRichTextWithText(result)
-		rtt.Wrapping = fyne.TextWrapWord
+		//rtt = widget.NewMultiLineEntry() //widget.NewRichTextWithText(result)
+		//rtt.Wrapping = fyne.TextWrapWord
 
-		rtt.Scroll = container.ScrollBoth
+		rtt.SetText(result)
+
+		//rtt.Scroll = container.ScrollBoth
 
 		ml.RemoveAll()
 		ml.Add(rtt)
@@ -140,15 +151,16 @@ This styled row should also wrap as expected, but only *when required*.
 
 	//right := container.NewVBox(mainBox)
 
-	main := container.NewHSplit(makeList(edit), mainBox)
+	main := container.NewHSplit(makeList(edit, rtt), mainBox)
 	main.SetOffset(.20)
 
 	w.SetContent(main)
 	w.Resize(fyne.NewSize(800, 500))
+	w.CenterOnScreen()
 	w.ShowAndRun()
 }
 
-func makeList(edit *widget.Entry) fyne.CanvasObject {
+func makeList(edit *widget.Entry, rtt *widget.Entry) fyne.CanvasObject {
 
 	data := service.List() //make([]string, 1000)
 	for i := range data {
@@ -169,12 +181,15 @@ func makeList(edit *widget.Entry) fyne.CanvasObject {
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
 
-			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(dataList[id])
+			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(dataList[id].Prompt)
 
 		},
 	)
 	list.OnSelected = func(id widget.ListItemID) {
-		edit.SetText("Hello")
+
+		c := dataList[id]
+		edit.SetText(c.Prompt)
+		rtt.SetText(c.Response)
 
 	}
 	list.OnUnselected = func(id widget.ListItemID) {
