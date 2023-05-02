@@ -34,6 +34,7 @@ func main() {
 
 	a := app.NewWithID("io.fyne.demo")
 	a.Settings().SetTheme(theme.DarkTheme())
+
 	a.SetIcon(theme.FyneLogo())
 	//makeTray(a)
 	logLifecycle(a)
@@ -81,6 +82,7 @@ This styled row should also wrap as expected, but only *when required*.
 	var box *fyne.Container
 
 	edit := widget.NewMultiLineEntry()
+
 	rtt := widget.NewMultiLineEntry()
 	rtt.Wrapping = fyne.TextWrapWord
 
