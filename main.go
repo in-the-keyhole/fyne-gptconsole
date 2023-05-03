@@ -27,9 +27,11 @@ var dataList []service.Chat
 
 var infProgress = widget.NewProgressBarInfinite()
 var endProgress = make(chan interface{}, 1)
+var currentIndex int
 
 func main() {
 
+	service.ReadKey()
 	dataList = service.Read()
 
 	a := app.NewWithID("io.fyne.demo")
@@ -80,6 +82,8 @@ This styled row should also wrap as expected, but only *when required*.
 	rich.Scroll = container.ScrollBoth
 
 	var box *fyne.Container
+	var mainBox *fyne.Container
+	var formBox *fyne.Container
 
 	edit := widget.NewMultiLineEntry()
 
@@ -95,7 +99,15 @@ This styled row should also wrap as expected, but only *when required*.
 
 	clearAction := func() {
 		edit.SetText("")
-		//ml.String("")
+		rtt.SetText("")
+
+	}
+
+	showKeyEdit := func(formBox *fyne.Container, ml *fyne.Container, rtt fyne.CanvasObject) {
+		formBox.Hide()
+		ml.RemoveAll()
+
+		createKeyUpdateForm(formBox, ml, rtt)
 
 	}
 
@@ -103,7 +115,7 @@ This styled row should also wrap as expected, but only *when required*.
 		//widget.NewToolbarSeparator(),
 		widget.NewToolbarSpacer(),
 		widget.NewToolbarAction(theme.ContentClearIcon(), clearAction),
-		widget.NewToolbarAction(theme.ContentCopyIcon(), func() { fmt.Println("Copy") }),
+		widget.NewToolbarAction(theme.AccountIcon(), func() { showKeyEdit(formBox, ml, rtt) }),
 		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
 	)
 
@@ -145,21 +157,65 @@ This styled row should also wrap as expected, but only *when required*.
 	box = container.NewBorder(nil, nil, nil, nil, ml)
 	box.Resize(fyne.NewSize(500, 500))
 
-	formBox := container.NewBorder(nil, nil, nil, doItButton, edit)
+	formBox = container.NewBorder(nil, nil, nil, doItButton, edit)
 
 	toolFormBox := container.NewBorder(toolBar, nil, nil, nil, formBox)
 
-	var mainBox = container.NewBorder(toolFormBox, nil, nil, nil, box)
+	mainBox = container.NewBorder(toolFormBox, nil, nil, nil, box)
 
 	//right := container.NewVBox(mainBox)
 
 	main := container.NewHSplit(makeList(edit, rtt), mainBox)
-	main.SetOffset(.20)
+	main.SetOffset(.10)
 
 	w.SetContent(main)
 	w.Resize(fyne.NewSize(800, 500))
 	w.CenterOnScreen()
+
+	if !service.ApiKeyExists() {
+
+		showKeyEdit(formBox, ml, rtt)
+	}
+
 	w.ShowAndRun()
+
+}
+
+func createKeyUpdateForm(formBox *fyne.Container, ml *fyne.Container, rtt fyne.CanvasObject) {
+
+	akey := service.ApiKey()
+	key := widget.NewEntry()
+	key.SetText(akey)
+
+	done := func() {
+
+		ml.Add(rtt)
+		formBox.Show()
+		list.Select(currentIndex)
+	}
+
+	form := &widget.Form{
+		Items: []*widget.FormItem{
+			{Text: "", Widget: key, HintText: "API Access Key"},
+		},
+		OnCancel: func() {
+
+			done()
+
+		},
+		OnSubmit: func() {
+
+			service.WriteKey(key.Text)
+			done()
+
+			// skey := key.Text
+
+		},
+		SubmitText: "Apply",
+	}
+
+	ml.Add(form)
+
 }
 
 func makeList(edit *widget.Entry, rtt *widget.Entry) fyne.CanvasObject {
@@ -179,7 +235,7 @@ func makeList(edit *widget.Entry, rtt *widget.Entry) fyne.CanvasObject {
 		},
 		func() fyne.CanvasObject {
 
-			return container.NewHBox(widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("                                  "))
+			return container.NewHBox(widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("                                                                     "))
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
 
@@ -188,6 +244,8 @@ func makeList(edit *widget.Entry, rtt *widget.Entry) fyne.CanvasObject {
 		},
 	)
 	list.OnSelected = func(id widget.ListItemID) {
+
+		currentIndex = id
 
 		c := dataList[id]
 		edit.SetText(c.Prompt)

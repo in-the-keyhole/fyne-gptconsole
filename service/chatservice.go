@@ -17,11 +17,28 @@ type Chat struct {
 
 var chatList []Chat
 
-var apikey = "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"
+//var apikey = "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"
 
-var client = openai.NewClient(apikey)
+var apiKey string = ""
+
+//var client = openai.NewClient(apikey)
 
 var list []string
+
+func ApiKeyExists() bool {
+
+	return !(apiKey == "")
+}
+
+func ApiKey() string {
+
+	return apiKey
+
+}
+
+func Save(key string) {
+
+}
 
 func Add(s string) {
 
@@ -110,8 +127,55 @@ func Read() []Chat {
 
 }
 
+func ReadKey() string {
+
+	if !exists("gptconsole.key") {
+
+		return ""
+
+	}
+
+	// open the file
+	s, err := ioutil.ReadFile("gptconsole.key")
+	if err != nil {
+		fmt.Println(err)
+		return ""
+
+	}
+
+	apiKey = string(s[:])
+	return apiKey
+
+}
+
+func WriteKey(k string) {
+
+	// open a file to write to
+	file, err := os.Create("gptconsole.key")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// write the JSON data to the file
+	_, err = file.Write([]byte(k))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// close the file
+	err = file.Close()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	apiKey = k
+}
+
 func Prompt(content string) string {
-	//client := openai.NewClient(apikey)
+	client := openai.NewClient(apiKey)
 	resp, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
