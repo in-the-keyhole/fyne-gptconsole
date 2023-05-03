@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"gptconsole/service"
@@ -100,6 +101,7 @@ This styled row should also wrap as expected, but only *when required*.
 	clearAction := func() {
 		edit.SetText("")
 		rtt.SetText("")
+		list.Unselect(currentIndex)
 
 	}
 
@@ -129,7 +131,9 @@ This styled row should also wrap as expected, but only *when required*.
 
 		c := service.Chat{Prompt: edit.Text, Response: result}
 
-		dataList = append(append(dataList, c), dataList...)[len(dataList):]
+		dataList = addResult(c)
+
+		//dataList = append(append(dataList, c), dataList...)[len(dataList):]
 
 		service.Write(dataList)
 
@@ -166,7 +170,7 @@ This styled row should also wrap as expected, but only *when required*.
 	//right := container.NewVBox(mainBox)
 
 	main := container.NewHSplit(makeList(edit, rtt), mainBox)
-	main.SetOffset(.10)
+	main.SetOffset(.20)
 
 	w.SetContent(main)
 	w.Resize(fyne.NewSize(800, 500))
@@ -178,6 +182,21 @@ This styled row should also wrap as expected, but only *when required*.
 	}
 
 	w.ShowAndRun()
+
+}
+
+func addResult(c service.Chat) []service.Chat {
+
+	for i := 0; i < len(dataList); i++ {
+		if strings.ToLower(dataList[i].Prompt) == strings.ToLower(c.Prompt) {
+			dataList[i].Response = c.Response
+			return dataList
+		}
+	}
+
+	result := append(append(dataList, c), dataList...)[len(dataList):]
+
+	return result
 
 }
 
@@ -235,11 +254,14 @@ func makeList(edit *widget.Entry, rtt *widget.Entry) fyne.CanvasObject {
 		},
 		func() fyne.CanvasObject {
 
-			return container.NewHBox(widget.NewIcon(theme.DocumentIcon()), widget.NewLabel("                                                                     "))
+			deletef := func() { dataList = append(dataList[:currentIndex], dataList[currentIndex+1:]...) }
+			delete := widget.NewButtonWithIcon("", theme.DeleteIcon(), deletef)
+
+			return container.NewHBox(widget.NewLabel("                                                 "), delete)
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
 
-			item.(*fyne.Container).Objects[1].(*widget.Label).SetText(dataList[id].Prompt)
+			item.(*fyne.Container).Objects[0].(*widget.Label).SetText(dataList[id].Prompt)
 
 		},
 	)

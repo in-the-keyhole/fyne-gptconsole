@@ -191,7 +191,7 @@ func Prompt(content string) string {
 
 	if err != nil {
 		fmt.Printf("ChatCompletion error: %v\n", err)
-		return "Error"
+		return "Error, make sure you have a valid ChatGPT API Key"
 	}
 
 	fmt.Println(resp.Choices[0].Message.Content)
