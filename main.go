@@ -138,6 +138,8 @@ This styled row should also wrap as expected, but only *when required*.
 
 		service.Add(result)
 
+		list.Select(len(dataList) - 1)
+
 		//rtt = widget.NewMultiLineEntry() //widget.NewRichTextWithText(result)
 		//rtt.Wrapping = fyne.TextWrapWord
 
@@ -198,6 +200,7 @@ func deleteItemAction(w fyne.Window) {
 
 		if ok {
 			dataList = append(dataList[:currentIndex], dataList[currentIndex+1:]...)
+			list.Refresh()
 			service.Write(dataList)
 		}
 
@@ -216,6 +219,7 @@ func clearListAction(w fyne.Window) {
 
 		if ok {
 			dataList = []service.Chat{}
+			list.Refresh()
 			service.Write(dataList)
 		}
 
@@ -237,7 +241,8 @@ func addResult(c service.Chat) []service.Chat {
 		}
 	}
 
-	result := append(append(dataList, c), dataList...)[len(dataList):]
+	//result := append(append(dataList, c), dataList...)[len(dataList):]
+	result := append(dataList, c)
 
 	return result
 
