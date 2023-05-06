@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"gptconsole/custom"
 	"gptconsole/service"
 
 	"fyne.io/fyne/v2"
@@ -85,7 +86,14 @@ This styled row should also wrap as expected, but only *when required*.
 	var mainBox *fyne.Container
 	var formBox *fyne.Container
 
-	edit := widget.NewMultiLineEntry()
+	edit := custom.NewMultilineEdit()
+
+	/*	edit.KeyDown()KeyDown( func(keyEvent *fyne.KeyEvent) {
+	    if keyEvent.Name == fyne.KeyReturn {
+	        fmt.Println("Submitted:", input.Text)
+	        // Handle the submission logic here
+	    }
+	} */
 
 	rtt := widget.NewMultiLineEntry()
 	rtt.Wrapping = fyne.TextWrapWord
@@ -132,16 +140,9 @@ This styled row should also wrap as expected, but only *when required*.
 
 		dataList = addResult(c)
 
-		//dataList = append(append(dataList, c), dataList...)[len(dataList):]
-
 		service.Write(dataList)
 
 		service.Add(result)
-
-		list.Select(len(dataList) - 1)
-
-		//rtt = widget.NewMultiLineEntry() //widget.NewRichTextWithText(result)
-		//rtt.Wrapping = fyne.TextWrapWord
 
 		rtt.SetText(result)
 
@@ -156,6 +157,8 @@ This styled row should also wrap as expected, but only *when required*.
 
 		list.Refresh()
 	}
+
+	edit.OnEnter = doItAction
 
 	doItButton := widget.NewButton("Go", doItAction)
 
@@ -237,11 +240,15 @@ func addResult(c service.Chat) []service.Chat {
 	for i := 0; i < len(dataList); i++ {
 		if strings.ToLower(dataList[i].Prompt) == strings.ToLower(c.Prompt) {
 			dataList[i].Response = c.Response
+			currentIndex = i
+			list.Select(currentIndex)
 			return dataList
 		}
 	}
 
 	//result := append(append(dataList, c), dataList...)[len(dataList):]
+	currentIndex = len(dataList)
+	list.Select(currentIndex)
 	result := append(dataList, c)
 
 	return result
@@ -285,7 +292,7 @@ func createKeyUpdateForm(formBox *fyne.Container, ml *fyne.Container, rtt fyne.C
 
 }
 
-func makeList(edit *widget.Entry, rtt *widget.Entry) fyne.CanvasObject {
+func makeList(edit *custom.MultilineEdit, rtt *widget.Entry) fyne.CanvasObject {
 
 	data := service.List() //make([]string, 1000)
 	for i := range data {
