@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
 	"gptconsole/custom"
+	"gptconsole/custometheme"
 	"gptconsole/service"
 
 	"fyne.io/fyne/v2"
@@ -33,18 +35,17 @@ func main() {
 	dataList = service.Read()
 
 	a := app.NewWithID("io.fyne.demo")
-	//a.Settings().SetTheme(custometheme.NewCustomTheme())
+	a.Settings().SetTheme(custometheme.NewCustomTheme())
 	a.Settings().SetTheme(theme.DarkTheme())
 
 	infProgress = widget.NewProgressBarInfinite()
 
 	a.SetIcon(theme.FyneLogo())
-	//makeTray(a)
 	logLifecycle(a)
 	w := a.NewWindow("GPT Console")
 	topWindow = w
 
-	//	w.SetMainMenu(makeMenu(a, w))
+	w.SetMainMenu(makeMenu(a, w))
 	w.SetMaster()
 
 	//content := container.NewMax()
@@ -87,6 +88,7 @@ This styled row should also wrap as expected, but only *when required*.
 	var formBox *fyne.Container
 
 	edit := custom.NewMultilineEdit()
+	edit.SetPlaceHolder("What would you like to know Dave? HAL...")
 
 	/*	edit.KeyDown()KeyDown( func(keyEvent *fyne.KeyEvent) {
 	    if keyEvent.Name == fyne.KeyReturn {
@@ -420,4 +422,67 @@ func stopProgress() {
 
 	infProgress.Stop()
 	endProgress <- struct{}{}
+}
+
+func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
+
+	/*
+		openSettings := func() {
+			w := a.NewWindow("Fyne Settings")
+			w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
+			w.Resize(fyne.NewSize(480, 480))
+			w.Show()
+		} */
+
+	var darkItem *fyne.MenuItem
+	var lightItem *fyne.MenuItem
+
+	darkTheme := func() {
+
+		a.Settings().SetTheme(theme.DarkTheme())
+		lightItem.Checked = false
+		darkItem.Checked = true
+
+	}
+
+	lightTheme := func() {
+
+		a.Settings().SetTheme(theme.LightTheme())
+		darkItem.Checked = false
+		lightItem.Checked = true
+
+	}
+
+	darkItem = fyne.NewMenuItem("Dark Theme", darkTheme)
+	darkItem.Checked = true
+
+	lightItem = fyne.NewMenuItem("Light Theme", lightTheme)
+	lightItem.Checked = false
+
+	//settingsItem := fyne.NewMenuItem("Settings", openSettings)
+	//settingsShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyComma, Modifier: fyne.KeyModifierShortcutDefault}
+	//settingsItem.Shortcut = settingsShortcut
+	//w.Canvas().AddShortcut(settingsShortcut, func(shortcut fyne.Shortcut) {
+	//	openSettings()
+	//})
+
+	file := fyne.NewMenu("Appearance")
+	device := fyne.CurrentDevice()
+	if !device.IsMobile() && !device.IsBrowser() {
+		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), darkItem, lightItem)
+
+	}
+
+	helpMenu := fyne.NewMenu("Help",
+		fyne.NewMenuItem("About", func() {
+			u, _ := url.Parse("https://keyholesoftware.com")
+			_ = a.OpenURL(u)
+		}))
+
+	main := fyne.NewMainMenu(
+		file,
+		helpMenu,
+	)
+
+	return main
 }
