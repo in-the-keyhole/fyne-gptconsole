@@ -90,6 +90,10 @@ This styled row should also wrap as expected, but only *when required*.
 	edit := custom.NewMultilineEdit()
 	edit.SetPlaceHolder("What would you like to know Dave? HAL...")
 
+	context := widget.NewEntry()
+
+	context.SetPlaceHolder("Search Context i.e  Java, C#, Javascript, Reac, etc...")
+
 	/*	edit.KeyDown()KeyDown( func(keyEvent *fyne.KeyEvent) {
 	    if keyEvent.Name == fyne.KeyReturn {
 	        fmt.Println("Submitted:", input.Text)
@@ -127,7 +131,11 @@ This styled row should also wrap as expected, but only *when required*.
 		widget.NewToolbarSpacer(),
 		widget.NewToolbarAction(theme.ContentClearIcon(), clearAction),
 		widget.NewToolbarAction(theme.AccountIcon(), func() { showKeyEdit(formBox, ml, rtt) }),
-		widget.NewToolbarAction(theme.ContentPasteIcon(), func() { fmt.Println("Paste") }),
+		widget.NewToolbarAction(theme.ContentCopyIcon(), func() {
+			clipboard := topWindow.Clipboard()
+			text := context.Text + " - " + edit.Text + "\n\n" + rtt.Text
+			clipboard.SetContent(text)
+		}),
 	)
 
 	doItAction := func() {
@@ -136,15 +144,13 @@ This styled row should also wrap as expected, but only *when required*.
 		ml.Add(infProgress)
 		startProgress()
 
-		result := service.Prompt(edit.Text)
+		result := service.Prompt(context.Text + " " + edit.Text)
 
-		c := service.Chat{Prompt: edit.Text, Response: result}
+		c := service.Chat{Context: context.Text, Prompt: edit.Text, Response: result}
 
 		dataList = addResult(c)
 
 		service.Write(dataList)
-
-		service.Add(result)
 
 		rtt.SetText(result)
 
@@ -158,16 +164,19 @@ This styled row should also wrap as expected, but only *when required*.
 		stopProgress()
 
 		list.Refresh()
+
 	}
 
 	edit.OnEnter = doItAction
 
 	doItButton := widget.NewButton("Go", doItAction)
 
+	contextBox := container.NewMax(context)
+
 	box = container.NewBorder(nil, nil, nil, nil, ml)
 	box.Resize(fyne.NewSize(500, 500))
 
-	formBox = container.NewBorder(nil, nil, nil, doItButton, edit)
+	formBox = container.NewBorder(contextBox, nil, nil, doItButton, edit)
 
 	toolFormBox := container.NewBorder(toolBar, nil, nil, nil, formBox)
 
@@ -179,7 +188,7 @@ This styled row should also wrap as expected, but only *when required*.
 		widget.NewToolbarAction(theme.DeleteIcon(), func() { deleteItemAction(topWindow) }),
 	)
 
-	listBox := container.NewBorder(nil, listToolBar, nil, nil, makeList(edit, rtt))
+	listBox := container.NewBorder(nil, listToolBar, nil, nil, makeList(edit, rtt, context))
 
 	main := container.NewHSplit(listBox, mainBox)
 	main.SetOffset(.20)
@@ -240,7 +249,7 @@ func clearListAction(w fyne.Window) {
 func addResult(c service.Chat) []service.Chat {
 
 	for i := 0; i < len(dataList); i++ {
-		if strings.ToLower(dataList[i].Prompt) == strings.ToLower(c.Prompt) {
+		if (strings.ToLower(dataList[i].Context) == strings.ToLower(c.Context)) && (strings.ToLower(dataList[i].Prompt) == strings.ToLower(c.Prompt)) {
 			dataList[i].Response = c.Response
 			currentIndex = i
 			list.Select(currentIndex)
@@ -248,12 +257,14 @@ func addResult(c service.Chat) []service.Chat {
 		}
 	}
 
+	list.Select(len(dataList))
 	//result := append(append(dataList, c), dataList...)[len(dataList):]
-	currentIndex = len(dataList)
+	dataList := append(dataList, c)
+	currentIndex = len(dataList) - 1
+	//currentIndex = 2
 	list.Select(currentIndex)
-	result := append(dataList, c)
 
-	return result
+	return dataList
 
 }
 
@@ -294,7 +305,7 @@ func createKeyUpdateForm(formBox *fyne.Container, ml *fyne.Container, rtt fyne.C
 
 }
 
-func makeList(edit *custom.MultilineEdit, rtt *widget.Entry) fyne.CanvasObject {
+func makeList(edit *custom.MultilineEdit, rtt *widget.Entry, context *widget.Entry) fyne.CanvasObject {
 
 	data := service.List() //make([]string, 1000)
 	for i := range data {
@@ -329,6 +340,7 @@ func makeList(edit *custom.MultilineEdit, rtt *widget.Entry) fyne.CanvasObject {
 		c := dataList[id]
 		edit.SetText(c.Prompt)
 		rtt.SetText(c.Response)
+		context.SetText(c.Context)
 
 	}
 	list.OnUnselected = func(id widget.ListItemID) {

@@ -15,6 +15,7 @@ import (
 )
 
 type Chat struct {
+	Context  string
 	Prompt   string
 	Response string
 }
