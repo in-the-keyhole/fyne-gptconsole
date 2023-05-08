@@ -43,7 +43,7 @@ func (customTheme) Size(s fyne.ThemeSizeName) float32 {
 	case theme.SizeNameScrollBarSmall:
 		return 5
 	case theme.SizeNameText:
-		return 16
+		return 22
 	case theme.SizeNameHeadingText:
 		return 30
 	case theme.SizeNameSubHeadingText:

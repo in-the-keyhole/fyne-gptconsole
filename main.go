@@ -28,6 +28,7 @@ var dataList []service.Chat
 var infProgress *widget.ProgressBarInfinite
 var endProgress = make(chan interface{}, 1)
 var currentIndex int
+var currentTheme string
 
 func main() {
 
@@ -35,8 +36,18 @@ func main() {
 	dataList = service.Read()
 
 	a := app.NewWithID("io.fyne.demo")
-	a.Settings().SetTheme(custometheme.NewCustomTheme())
-	a.Settings().SetTheme(theme.DarkTheme())
+	p := a.Preferences()
+	currentTheme = p.String("theme")
+	//a.Settings().SetTheme(custometheme.NewCustomTheme())
+	if currentTheme == "" {
+		a.Settings().SetTheme(theme.DarkTheme())
+	} else if currentTheme == "prez" {
+		a.Settings().SetTheme(custometheme.NewCustomTheme())
+	} else if currentTheme == "dark" {
+		a.Settings().SetTheme(theme.DarkTheme())
+	} else if currentTheme == "light" {
+		a.Settings().SetTheme(theme.LightTheme())
+	}
 
 	infProgress = widget.NewProgressBarInfinite()
 
@@ -448,28 +459,61 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 
 	var darkItem *fyne.MenuItem
 	var lightItem *fyne.MenuItem
+	var prezItem *fyne.MenuItem
+
+	s := func() {
+
+		lightItem.Checked = currentTheme == "light"
+		prezItem.Checked = currentTheme == "prez"
+		darkItem.Checked = currentTheme == "dark"
+	}
+
+	prezTheme := func() {
+
+		a.Settings().SetTheme(custometheme.NewCustomTheme())
+
+		prefs := a.Preferences()
+		prefs.SetString("theme", "prez")
+		currentTheme = "prez"
+
+		s()
+
+	}
 
 	darkTheme := func() {
 
 		a.Settings().SetTheme(theme.DarkTheme())
-		lightItem.Checked = false
-		darkItem.Checked = true
+
+		prefs := a.Preferences()
+		prefs.SetString("theme", "dark")
+		currentTheme = "dark"
+
+		s()
 
 	}
 
 	lightTheme := func() {
 
 		a.Settings().SetTheme(theme.LightTheme())
-		darkItem.Checked = false
-		lightItem.Checked = true
+
+		prefs := a.Preferences()
+		prefs.SetString("theme", "light")
+		currentTheme = "light"
+
+		s()
 
 	}
 
 	darkItem = fyne.NewMenuItem("Dark Theme", darkTheme)
-	darkItem.Checked = true
+	darkItem.Checked = currentTheme == "dark"
 
 	lightItem = fyne.NewMenuItem("Light Theme", lightTheme)
-	lightItem.Checked = false
+	lightItem.Checked = currentTheme == "light"
+
+	prezItem = fyne.NewMenuItem("Presentation Theme", prezTheme)
+	prezItem.Checked = currentTheme == "prez"
+
+	//prezItem.Checked = false
 
 	//settingsItem := fyne.NewMenuItem("Settings", openSettings)
 	//settingsShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyComma, Modifier: fyne.KeyModifierShortcutDefault}
@@ -481,7 +525,7 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	file := fyne.NewMenu("Appearance")
 	device := fyne.CurrentDevice()
 	if !device.IsMobile() && !device.IsBrowser() {
-		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), darkItem, lightItem)
+		file.Items = append(file.Items, fyne.NewMenuItemSeparator(), darkItem, lightItem, prezItem)
 
 	}
 
