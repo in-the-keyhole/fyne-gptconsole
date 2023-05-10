@@ -103,7 +103,7 @@ This styled row should also wrap as expected, but only *when required*.
 
 	context := widget.NewEntry()
 
-	context.SetPlaceHolder("Search Context i.e  Java, C#, Javascript, Reac, etc...")
+	context.SetPlaceHolder("Prompt Context i.e  Java, C#, Javascript, React, etc...")
 
 	/*	edit.KeyDown()KeyDown( func(keyEvent *fyne.KeyEvent) {
 	    if keyEvent.Name == fyne.KeyReturn {
