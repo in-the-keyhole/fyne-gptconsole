@@ -22,11 +22,7 @@ type Chat struct {
 
 var chatList []Chat
 
-//var apikey = "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"
-
 var apiKey string = ""
-
-//var client = openai.NewClient(apikey)
 
 var list []string
 

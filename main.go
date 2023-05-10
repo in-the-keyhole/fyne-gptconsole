@@ -16,7 +16,6 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -59,40 +58,8 @@ func main() {
 	w.SetMainMenu(makeMenu(a, w))
 	w.SetMaster()
 
-	//content := container.NewMax()
-	//title := widget.NewLabel("Component name")
 	intro := widget.NewLabel("An introduction would probably go\nhere, as well as a")
 	intro.Wrapping = fyne.TextWrapWord
-
-	//label := widget.NewLabel("Hello, World!")
-
-	rich := widget.NewRichTextFromMarkdown(`
-# RichText Heading
-
-## A Sub Heading
-
-![title](../../theme/icons/fyne.png)
-
----
-
-* Item1 in _three_ segments
-* Item2
-* Item3
-
-
-"
-
-func() {} 
-
-"
-
-
-Normal **Bold** *Italic* [Link](https://fyne.io/) and some ` + "`Code`" + `.
-This styled row should also wrap as expected, but only *when required*.
-
-> An interesting quote here, most likely sharing some very interesting wisdom.`)
-
-	rich.Scroll = container.ScrollBoth
 
 	var box *fyne.Container
 	var mainBox *fyne.Container
@@ -104,13 +71,6 @@ This styled row should also wrap as expected, but only *when required*.
 	context := widget.NewEntry()
 
 	context.SetPlaceHolder("Prompt Context i.e  Java, C#, Javascript, React, etc...")
-
-	/*	edit.KeyDown()KeyDown( func(keyEvent *fyne.KeyEvent) {
-	    if keyEvent.Name == fyne.KeyReturn {
-	        fmt.Println("Submitted:", input.Text)
-	        // Handle the submission logic here
-	    }
-	} */
 
 	rtt := widget.NewMultiLineEntry()
 	rtt.Wrapping = fyne.TextWrapWord
@@ -138,7 +98,6 @@ This styled row should also wrap as expected, but only *when required*.
 	}
 
 	toolBar := widget.NewToolbar(widget.NewToolbarAction(nil, func() { fmt.Println("New") }),
-		//widget.NewToolbarSeparator(),
 		widget.NewToolbarSpacer(),
 		widget.NewToolbarAction(theme.ContentClearIcon(), clearAction),
 		widget.NewToolbarAction(theme.AccountIcon(), func() { showKeyEdit(formBox, ml, rtt) }),
@@ -156,20 +115,16 @@ This styled row should also wrap as expected, but only *when required*.
 		startProgress()
 
 		result := service.Prompt(context.Text + " " + edit.Text)
-
 		c := service.Chat{Context: context.Text, Prompt: edit.Text, Response: result}
-
 		dataList = addResult(c)
 
 		service.Write(dataList)
 
 		rtt.SetText(result)
-
 		ml.RemoveAll()
 		ml.Add(rtt)
 
 		box.Refresh()
-
 		stopProgress()
 
 		list.Refresh()
@@ -178,9 +133,7 @@ This styled row should also wrap as expected, but only *when required*.
 	}
 
 	edit.OnEnter = doItAction
-
 	doItButton := widget.NewButton("Go", doItAction)
-
 	contextBox := container.NewMax(context)
 
 	box = container.NewBorder(nil, nil, nil, nil, ml)
@@ -267,14 +220,10 @@ func addResult(c service.Chat) []service.Chat {
 		}
 	}
 
-	//result := append(append(dataList, c), dataList...)[len(dataList):]
 	dataList := append(dataList, c)
 	list.Refresh()
 
 	currentIndex = len(dataList) - 1
-	//currentIndex = 2
-
-	//	list.Select(currentIndex)
 
 	return dataList
 
@@ -307,8 +256,6 @@ func createKeyUpdateForm(formBox *fyne.Container, ml *fyne.Container, rtt fyne.C
 			service.WriteKey(key.Text)
 			done()
 
-			// skey := key.Text
-
 		},
 		SubmitText: "Apply",
 	}
@@ -319,7 +266,7 @@ func createKeyUpdateForm(formBox *fyne.Container, ml *fyne.Container, rtt fyne.C
 
 func makeList(edit *custom.MultilineEdit, rtt *widget.Entry, context *widget.Entry) fyne.CanvasObject {
 
-	data := service.List() //make([]string, 1000)
+	data := service.List()
 	for i := range data {
 		data[i] = "Test Item " + strconv.Itoa(i)
 	}
@@ -384,37 +331,9 @@ func logLifecycle(a fyne.App) {
 	})
 }
 
-func makeTray(a fyne.App) {
-	if desk, ok := a.(desktop.App); ok {
-		h := fyne.NewMenuItem("Hello", func() {})
-		h.Icon = theme.HomeIcon()
-		menu := fyne.NewMenu("Hello World", h)
-		h.Action = func() {
-			log.Println("System tray menu tapped")
-			h.Label = "Welcome"
-			menu.Refresh()
-		}
-		desk.SetSystemTrayMenu(menu)
-	}
-}
-
-func shortcutFocused(s fyne.Shortcut, w fyne.Window) {
-	switch sh := s.(type) {
-	case *fyne.ShortcutCopy:
-		sh.Clipboard = w.Clipboard()
-	case *fyne.ShortcutCut:
-		sh.Clipboard = w.Clipboard()
-	case *fyne.ShortcutPaste:
-		sh.Clipboard = w.Clipboard()
-	}
-	if focused, ok := w.Canvas().Focused().(fyne.Shortcutable); ok {
-		focused.TypedShortcut(s)
-	}
-}
-
 func startProgress() {
 
-	select { // ignore stale end message
+	select {
 	case <-endProgress:
 	default:
 	}
@@ -433,7 +352,6 @@ func startProgress() {
 			num += 0.002
 		}
 
-		// TODO make sure this resets when we hide etc...
 		stopProgress()
 	}()
 	infProgress.Start()
@@ -449,14 +367,6 @@ func stopProgress() {
 }
 
 func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
-
-	/*
-		openSettings := func() {
-			w := a.NewWindow("Fyne Settings")
-			w.SetContent(settings.NewSettings().LoadAppearanceScreen(w))
-			w.Resize(fyne.NewSize(480, 480))
-			w.Show()
-		} */
 
 	var darkItem *fyne.MenuItem
 	var lightItem *fyne.MenuItem
@@ -513,15 +423,6 @@ func makeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 
 	prezItem = fyne.NewMenuItem("Presentation Theme", prezTheme)
 	prezItem.Checked = currentTheme == "prez"
-
-	//prezItem.Checked = false
-
-	//settingsItem := fyne.NewMenuItem("Settings", openSettings)
-	//settingsShortcut := &desktop.CustomShortcut{KeyName: fyne.KeyComma, Modifier: fyne.KeyModifierShortcutDefault}
-	//settingsItem.Shortcut = settingsShortcut
-	//w.Canvas().AddShortcut(settingsShortcut, func(shortcut fyne.Shortcut) {
-	//	openSettings()
-	//})
 
 	file := fyne.NewMenu("Appearance")
 	device := fyne.CurrentDevice()
