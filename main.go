@@ -165,8 +165,6 @@ This styled row should also wrap as expected, but only *when required*.
 
 		rtt.SetText(result)
 
-		//rtt.Scroll = container.ScrollBoth
-
 		ml.RemoveAll()
 		ml.Add(rtt)
 
@@ -175,6 +173,7 @@ This styled row should also wrap as expected, but only *when required*.
 		stopProgress()
 
 		list.Refresh()
+		list.Select(currentIndex)
 
 	}
 
@@ -268,12 +267,14 @@ func addResult(c service.Chat) []service.Chat {
 		}
 	}
 
-	list.Select(len(dataList))
 	//result := append(append(dataList, c), dataList...)[len(dataList):]
 	dataList := append(dataList, c)
+	list.Refresh()
+
 	currentIndex = len(dataList) - 1
 	//currentIndex = 2
-	list.Select(currentIndex)
+
+	//	list.Select(currentIndex)
 
 	return dataList
 
