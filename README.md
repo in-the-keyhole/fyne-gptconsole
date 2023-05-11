@@ -18,11 +18,11 @@ Its user-friendly interface is intuitive and easy to navigate, helping users to 
 
 ### MacOS 
 
-Copy `build/gptconsole.app` to application or desired folder select and double click to run
+Copy `build/gptconsole.app` to application or desired folder select and double-click to run.
 
 ### Windows 
 
-ToDo
+Todo
 
 ### Linux 
 
@@ -34,11 +34,11 @@ Todo
 
 2. Clone this repository 
 
-3. Get required modules with the following command 
+3. Get required modules with the following command:
 
    ``` $ go mod tidy```
 
-4. Execute the ./main.go  app with the following command 
+4. Execute the ./main.go  app with the following command:
 
     ```$ go run main.go```
 
