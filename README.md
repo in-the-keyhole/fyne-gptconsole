@@ -14,7 +14,7 @@ An open source GUI application written with [Fyne](https://fyne.io/) that implem
 
 ### MacOS 
 
-Copy gptconsole.app to application or desired folder and select 
+Copy `build/gptconsole.app` to application or desired folder select and double click to run
 
 ### Windows 
 
@@ -64,6 +64,6 @@ You can bundle the app as a platform runable binary with the following `fyne` co
 
 ### Linux 
 
-    ```$ /Users/davidpitt/go/bin/fyne package -os linux -icon logo.png```
+```$ /Users/davidpitt/go/bin/fyne package -os linux -icon logo.png```
 
 
