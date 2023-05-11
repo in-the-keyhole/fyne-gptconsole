@@ -32,14 +32,22 @@ Todo
 
 3. Get required modules with the following command 
 
-    > go mod tidy
+    $ go mod tidy
 
-2. 
+4. Execute the ./main.go  app with the following command 
+
+    $ go run main.go
 
 
+## Creating an executable 
 
+1. Use the following command to create an executable binary 
 
+    $ go build
 
+2. Execute the binary with the following command 
+
+    $ ./gptconsole
 
 
 
